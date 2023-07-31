@@ -38,13 +38,25 @@ def chromeStart():
         userCookieDir = os.path.abspath(f"./cookie")
         if os.path.exists(userCookieDir) == False:
           os.mkdir(userCookieDir)
+          
         with open("./data/chrome.txt", "r+",encoding='utf-8') as chrome_dir:
           chrome = chrome_dir.readlines()
+        with open("./data/number.txt", "r+",encoding='utf-8') as number_dir:
+          number = number_dir.readlines()
+          
+        userCookieDir = os.path.abspath(f"./cookie/{number[0]}")
+        if os.path.exists(userCookieDir) == False:
+            os.mkdir(userCookieDir)
+            
         if(chrome == ''):
           print("./data/chrome.txt 에 크롬의 위치를 입력 해주세요.")
           
-        chrome_cmd = '\"'+chrome[0]+'\" --remote-debugging-port=9221 --user-data-dir="'+str(userCookieDir)+'" --disable-gpu --disable-popup-blocking --disable-dev-shm-usage --disable-plugins --disable-background-networking'
-        options.add_experimental_option("debuggerAddress", "127.0.0.1:9221")
+        if(number == ''):
+          print("./data/number.txt 에 숫자를 입력 해주세요.")
+          
+        chrome_cmd = '\"'+chrome[0]+'\"  --remote-debugging-port=922'+str(number[0])+'  --user-data-dir="'+str(userCookieDir)+'" --disable-gpu --disable-popup-blocking --disable-dev-shm-usage --disable-plugins --disable-background-networking'
+        #options.add_experimental_option("debuggerAddress", "127.0.0.1:9221")
+        options.add_experimental_option("debuggerAddress", "127.0.0.1:922"+str(number[0]))
         p = subprocess.Popen(chrome_cmd, shell=True)
 
 
