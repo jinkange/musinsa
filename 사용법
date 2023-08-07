@@ -1,1 +1,1 @@
-pyinstaller --icon=./musinsa.ico --onefile main.py
+pyinstaller --icon=./musinsa.ico --onefile --name musinsa main.py

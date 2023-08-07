@@ -25,7 +25,7 @@ def is_within_last_week(date_string):
     # Get the current date
     current_date = datetime.now()
     # Calculate the date one week ago from the current date
-    one_week_ago = current_date + timedelta(weeks=1)
+    one_week_ago = current_date + timedelta(weeks=4)
     # Check if the input date is within the last week
     return current_date <= input_date <= one_week_ago
 
@@ -35,18 +35,20 @@ def chromeStart():
         #options = webdriver.ChromeOptions()
         options = Options()
         #options.add_argument("--disable-blink-features=AutomationControlled")
-        userCookieDir = os.path.abspath(f"./cookie")
-        if os.path.exists(userCookieDir) == False:
-          os.mkdir(userCookieDir)
+
           
         with open("./data/chrome.txt", "r+",encoding='utf-8') as chrome_dir:
           chrome = chrome_dir.readlines()
         with open("./data/number.txt", "r+",encoding='utf-8') as number_dir:
           number = number_dir.readlines()
           
-        userCookieDir = os.path.abspath(f"./cookie/{number[0]}")
+        userCookieDir = os.path.abspath(f"./cookie")
         if os.path.exists(userCookieDir) == False:
-            os.mkdir(userCookieDir)
+          os.mkdir(userCookieDir)
+          
+        # userCookieDir = os.path.abspath(f"./cookie/{number[0]}")
+        # if os.path.exists(userCookieDir) == False:
+        #     os.mkdir(userCookieDir)
             
         if(chrome == ''):
           print("./data/chrome.txt 에 크롬의 위치를 입력 해주세요.")
@@ -54,10 +56,11 @@ def chromeStart():
         if(number == ''):
           print("./data/number.txt 에 숫자를 입력 해주세요.")
           
-        chrome_cmd = '\"'+chrome[0]+'\"  --remote-debugging-port=922'+str(number[0])+'  --user-data-dir="'+str(userCookieDir)+'" --disable-gpu --disable-popup-blocking --disable-dev-shm-usage --disable-plugins --disable-background-networking'
+        #chrome_cmd = '\"'+chrome[0]+'\" --headless --remote-debugging-port=922'+str(number[0])+'  --user-data-dir="'+str(userCookieDir)+'" --disable-gpu --disable-popup-blocking --disable-dev-shm-usage --disable-plugins --disable-background-networking'
+        chrome_cmd = '\"'+chrome[0]+'\" --user-data-dir="'+str(userCookieDir)+'" --disable-gpu --disable-popup-blocking --disable-dev-shm-usage --disable-plugins --disable-background-networking'
         #options.add_experimental_option("debuggerAddress", "127.0.0.1:9221")
-        options.add_experimental_option("debuggerAddress", "127.0.0.1:922"+str(number[0]))
-        p = subprocess.Popen(chrome_cmd, shell=True)
+        #options.add_experimental_option("debuggerAddress", "127.0.0.1:922"+str(number[0]))
+        #p = subprocess.Popen(chrome_cmd, shell=True)
 
 
         driver = webdriver.Chrome(options=options)
@@ -80,6 +83,11 @@ def htmlLoadingCheck(driver:webdriver, xpath):
                 print()
                 
 def start():
+  with open("./data/password.txt", "r", encoding='utf-8') as password_file:
+    password_str = password_file.readline().strip()
+  
+  print("페이 비밀번호 :  ",password_str)
+  
   while True:
     goodUrl = input("구매할 무신사 주소 : ")
     if goodUrl:
@@ -101,8 +109,11 @@ def start():
 
   driver.get(goodUrl)
   print("로그인을 진행 해주세요.")
-  option_element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="default_top"]/div[3]/button')))
-  option_element.click()
+  try:
+    option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="default_top"]/div[3]/button')))
+    option_element.click()
+  except Exception:
+    print("로그인 확인..")
 
 
   # 로그인이 되길 기다려줘야하는데....
@@ -117,7 +128,6 @@ def start():
       except Exception:
           print()
       time.sleep(1)
-
   print("로그인 확인..")
   print("품절 체크")  
   while 1:
@@ -126,7 +136,7 @@ def start():
         # 해당 요소의 텍스트 가져오기
         element = driver.find_element(By.XPATH, "//*[contains(text(), '품절 또는 판매가 중지된 상품입니다.')]")
         driver.refresh()
-        time.sleep(5)
+        time.sleep(3)
       except:
         break
   print("판매 예정 체크")  
@@ -138,7 +148,7 @@ def start():
         #element = driver.find_element(By.XPATH, '//*[@id="buy_option_area"]/div[9]/div[1]/a')
         # '품절' 또는 '판매가 중지' 문구가 포함되어 있는지 확인
         driver.refresh()
-        time.sleep(5)
+        time.sleep(3)
       except:
         break
 
@@ -154,9 +164,6 @@ def start():
       available_options = option_dropdown.find_elements(By.XPATH, "./option[not(contains(text(), '옵션 선택'))]")
       # 재입고와 관련된 옵션을 제거
       available_options = [option for option in available_options if "재입고" not in option.text]
-
-      for a in available_options:
-        print(a.text)    
       # 랜덤으로 옵션 선택
       selected_option = random.choice(available_options)
       selected_option.click()
@@ -179,21 +186,54 @@ def start():
 
   try:
       buy_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), '바로구매')]")))
-      buy_button.click()
+      #buy_button.click()
+          # Click the element using JavaScript
+      driver.execute_script("arguments[0].click();", buy_button)
+      try:
+        # 얼럿이 표시될 때까지 대기 (10초로 설정)
+        WebDriverWait(driver, 0.1).until(EC.alert_is_present())
+        # 얼럿 객체 가져오기
+        alert = driver.switch_to.alert
+        # 얼럿 텍스트 출력 (선택사항)
+        print("Alert Text:", alert.text)
+        # 얼럿 확인 버튼 클릭 (선택사항)
+        alert.accept()
+        # 옵션 선택 드롭다운을 찾음
+        option_dropdown = driver.find_element(By.XPATH, "//select[@id='option1']")
+        # '옵션 선택'을 제외한 옵션들을 찾아서 리스트에 저장
+        available_options = option_dropdown.find_elements(By.XPATH, "./option[not(contains(text(), '옵션 선택'))]")
+        # 재입고와 관련된 옵션을 제거
+        available_options = [option for option in available_options if "재입고" not in option.text]
+        # 랜덤으로 옵션 선택
+        selected_option = random.choice(available_options)
+        selected_option.click()
+        buy_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), '바로구매')]")))
+        driver.execute_script("arguments[0].click();", buy_button)
+        #buy_button.click()
+      except Exception as e:
+          # 얼럿이 표시되지 않은 경우 예외 처리
+          print()
   except Exception as e:
       print("바로구매 버튼을 클릭하는데 실패했습니다.")
+      buy_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="buy_option_area"]/div[7]/div[1]/a')))
+      buy_button.click()
       print(str(e))
 
 
   while 1:
     try:
       # html 로딩 대기
-      goods = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cardSwiper"]/div[2]')))
+      goods = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
       if(goods):
         break
     except:
       time.sleep(1)
-
+  
+  radio_button = driver.find_element(By.XPATH,'//*[@id="payment_btn0"]')
+    # Click the radio button using JavaScript
+  driver.execute_script("arguments[0].click();", radio_button)
+    
+  
   option_element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cardSwiper"]/div[2]')))
   option_element.click()
   time.sleep(1)
@@ -208,7 +248,7 @@ def start():
 
   try:
       # 얼럿이 표시될 때까지 대기 (10초로 설정)
-      WebDriverWait(driver, 1).until(EC.alert_is_present())
+      WebDriverWait(driver, 0.1).until(EC.alert_is_present())
       # 얼럿 객체 가져오기
       alert = driver.switch_to.alert
       # 얼럿 텍스트 출력 (선택사항)
@@ -277,9 +317,6 @@ def start():
   #a_elements = driver.find_element(By.XPATH, '//*[@id="connectpay-portal-container"]/div/div/a')
       # a 태그의 텍스트 값 출력
 
-  with open("./data/password.txt", "r", encoding='utf-8') as password_file:
-    password_str = password_file.readline().strip()
-
   for password in password_str:  
     for a_element in a_elements:
       virtual_keypad_value = a_element.get_attribute("data-virtual-keypad")
@@ -334,7 +371,7 @@ def start():
   # )
   time.sleep(60)
   
-input_date_string = "2023-08-04"  # Replace this with the date you want to check
+input_date_string = "2023-09-01"  # Replace this with the date you want to check
 result = is_within_last_week(input_date_string)
 if(result):
   start()
