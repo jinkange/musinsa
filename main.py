@@ -154,9 +154,19 @@ def start():
 
   try:
     if(size != ''):
-      option_value_to_select = size
-      option_element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, f"//option[@value='{option_value_to_select}']")))
-      option_element.click()
+      try:
+        option_value_to_select = size
+        option_element = WebDriverWait(driver, 0.1).until(EC.element_to_be_clickable((By.XPATH, f"//option[@value='{option_value_to_select}']")))
+        option_element.click()
+      except:
+        option_dropdown = driver.find_element(By.XPATH, "//select[@id='option1']")
+        # '옵션 선택'을 제외한 옵션들을 찾아서 리스트에 저장
+        available_options = option_dropdown.find_elements(By.XPATH, "./option[not(contains(text(), '옵션 선택'))]")
+        # 재입고와 관련된 옵션을 제거
+        available_options = [option for option in available_options if "재입고" not in option.text]
+        # 랜덤으로 옵션 선택
+        selected_option = random.choice(available_options)
+        selected_option.click()  
     else:
       # 옵션 선택 드롭다운을 찾음
       option_dropdown = driver.find_element(By.XPATH, "//select[@id='option1']")
