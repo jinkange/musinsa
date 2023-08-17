@@ -110,7 +110,7 @@ def start():
   driver.get(goodUrl)
   print("로그인을 진행 해주세요.")
   try:
-    option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="default_top"]/div[3]/button')))
+    option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="topCommonPc"]/header/div[4]/button')))
     option_element.click()
   except Exception:
     print("로그인 확인..")
@@ -121,7 +121,7 @@ def start():
   while 1:
     if(driver.current_url in goodUrl):
       try : 
-          element = driver.find_element(By.XPATH, '//*[@id="default_top"]/div[3]/div[1]/a')
+          element = driver.find_element(By.XPATH, '//*[@id="topCommonPc"]/header/div[4]/div[1]/a')
           if (element):
               #로그인되어있음
               break
@@ -135,8 +135,8 @@ def start():
       try:
         # 해당 요소의 텍스트 가져오기
         element = driver.find_element(By.XPATH, "//*[contains(text(), '품절 또는 판매가 중지된 상품입니다.')]")
-        driver.refresh()
         time.sleep(3)
+        driver.refresh()
       except:
         break
   print("판매 예정 체크")  
@@ -147,8 +147,8 @@ def start():
         element = driver.find_element(By.XPATH, "//*[contains(text(), '판매 예정')]")
         #element = driver.find_element(By.XPATH, '//*[@id="buy_option_area"]/div[9]/div[1]/a')
         # '품절' 또는 '판매가 중지' 문구가 포함되어 있는지 확인
-        driver.refresh()
         time.sleep(3)
+        driver.refresh()
       except:
         break
 
@@ -233,7 +233,7 @@ def start():
   while 1:
     try:
       # html 로딩 대기
-      goods = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
+      goods = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
       if(goods):
         break
     except:
@@ -244,16 +244,16 @@ def start():
   driver.execute_script("arguments[0].click();", radio_button)
     
   
-  option_element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cardSwiper"]/div[2]')))
+  option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cardSwiper"]/div[2]')))
   option_element.click()
-  time.sleep(1)
+  time.sleep(0.5)
   try:
-    option_element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="allCheckAgree"]')))
+    option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="allCheckAgree"]')))
     option_element.click()
   except:
     print()
 
-  option_element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
+  option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
   option_element.click()    
 
   try:
@@ -265,9 +265,9 @@ def start():
       print("Alert Text:", alert.text)
       # 얼럿 확인 버튼 클릭 (선택사항)
       alert.accept()
-      option_element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="allCheckAgree"]')))
+      option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="allCheckAgree"]')))
       option_element.click()
-      option_element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
+      option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
       option_element.click()    
   except Exception as e:
       # 얼럿이 표시되지 않은 경우 예외 처리
@@ -298,7 +298,7 @@ def start():
   while 1:
     try:
       # html 로딩 대기
-      goods = driver.find_elements(By.XPATH, '//*[@id="connectpay-portal-container"]/div/div/a[2]')
+      goods = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="connectpay-portal-container"]/div/div/a[2]')))
       if(goods):
         break
     except:
@@ -327,61 +327,32 @@ def start():
   #a_elements = driver.find_element(By.XPATH, '//*[@id="connectpay-portal-container"]/div/div/a')
       # a 태그의 텍스트 값 출력
 
-  for password in password_str:  
-    for a_element in a_elements:
-      virtual_keypad_value = a_element.get_attribute("data-virtual-keypad")
-      if(password == a_element.text):
-        click_number_keypad(driver, virtual_keypad_value)
+  while 1:
+    try:
+      for password in password_str:  
+        for a_element in a_elements:
+          virtual_keypad_value = a_element.get_attribute("data-virtual-keypad")
+          if(password == a_element.text):
+            click_number_keypad(driver, virtual_keypad_value)
+            break
+      #창이 닫혔는지
+      new_window_still_open = False
+      for window_handle in driver.window_handles:
+        if window_handle != current_window:
+          new_window_still_open = True
+          break
+      #안닫혔으면 비번일 틀린건
+      if not new_window_still_open:
+        print("새 창이 닫혔습니다.")
         break
+      else:
+        print("새 창이 아직 열려 있습니다.")
+        goods = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[1]/div[1]/span[2]')))
+        if(goods):
+          print("비번틀림")
+          break
+    except Exception as e:
+      print(e)
 
-  print("구매 완료...")
-
-  # def click_number_keypad(driver, number):
-  #     # 숫자 키패드 엘리먼트를 찾음
-  #     keypad_element = driver.find_element(By.CLASS_NAME, "connectpay-1iyjup2")
-
-  #     # 숫자 키패드의 모든 숫자 버튼을 찾아 리스트에 저장
-  #     number_buttons = keypad_element.find_elements(By.CLASS_NAME, "connectpay-1wd7y69")
-
-  #     # 주어진 숫자를 찾아서 클릭
-  #     for button in number_buttons:
-  #         if button.get_attribute("data-virtual-keypad") == str(number):
-  #             button.click()
-  #             break
-  # with open("./data/chrome.txt", "r", encoding='utf-8') as password_file:
-  #     password_str = password_file.readline().strip()
-
-  # # 문자열 비밀번호를 숫자 리스트로 변환
-  # password = [int(digit) for digit in password_str]
-
-  # for digit in password:
-  #     click_number_keypad(driver, digit)
-  #     time.sleep(0.5)  # 숫자를 클릭한 후 잠시 대기 (0.5초)
-
-  # click_number_keypad(driver, 1)
-  # click_number_keypad(driver, 3)
-  # click_number_keypad(driver, 5)
-  # click_number_keypad(driver, 6)
-  # click_number_keypad(driver, 0)
-  # click_number_keypad(driver, 0)
-
-
-
-  # driver.execute_script(
-  #   "var anchorElement = document.querySelector("+\
-  #   "'#connectpay-portal-container > div > div > a:nth-child(1)');"+\
-  #   "if (anchorElement) {"+\
-  #     "var mouseUpEvent = new MouseEvent('mouseup', {"+\
-  #       "bubbles: true,"+\
-  #       "cancelable: true,"+\
-  #       "view: window,"+\
-  #     "});"+\
-  #     "anchorElement.dispatchEvent(mouseUpEvent);"+\
-  #   "}"
-  # )
   time.sleep(60)
-  
-input_date_string = "2023-09-01"  # Replace this with the date you want to check
-result = is_within_last_week(input_date_string)
-if(result):
-  start()
+start()
