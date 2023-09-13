@@ -164,7 +164,7 @@ def start():
         element = driver.find_element(By.XPATH, '//*[@id="count_product_info_'+last_word+'"]')
         element_text = element.text
         time.sleep(1)
-        if(element_text == "00:00:01"):
+        if(element_text == "00:00:01" or element_text == "00:00:00"):
           driver.refresh()
       except:
         break
