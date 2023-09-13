@@ -1,3 +1,4 @@
+import requests
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -19,6 +20,9 @@ from selenium.webdriver.common.alert import Alert
 import random
 import time
 from datetime import datetime, timedelta
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
+
 def is_within_last_week(date_string):
     # Convert the input date string to a datetime object
     input_date = datetime.strptime(date_string, "%Y-%m-%d")
@@ -62,8 +66,12 @@ def chromeStart():
         #options.add_experimental_option("debuggerAddress", "127.0.0.1:922"+str(number[0]))
         #p = subprocess.Popen(chrome_cmd, shell=True)
 
-
+        release = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+        # 버전명을 가져옵니다.
+        version = requests.get(release).text
         driver = webdriver.Chrome(options=options)
+        
+        
         return driver
     except Exception as e:
         print(e)
@@ -110,7 +118,8 @@ def start():
   driver.get(goodUrl)
   print("로그인을 진행 해주세요.")
   try:
-    option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="topCommonPc"]/header/div[4]/button')))
+    option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="topCommonPc"]/header/div[3]/button')))
+    
     option_element.click()
   except Exception:
     print("로그인 확인..")
@@ -121,7 +130,9 @@ def start():
   while 1:
     if(driver.current_url in goodUrl):
       try : 
-          element = driver.find_element(By.XPATH, '//*[@id="topCommonPc"]/header/div[4]/div[1]/a')
+          #element = driver.find_element(By.XPATH, '//*[@id="topCommonPc"]/header/div[4]/div[1]/a')
+          element = driver.find_element(By.XPATH, '//*[@id="topCommonPc"]/header/div[3]/div[1]/a')
+          
           if (element):
               #로그인되어있음
               break
@@ -292,13 +303,13 @@ def start():
               driver.switch_to.window(new_window)
           time.sleep(0.5)
 
-  iFrame = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH,'//*[@id="__tosspayments_connectpay_iframe__"]')))
+  iFrame = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH,'//*[@id="__tosspayments_brandpay_iframe__"]')))
   driver.switch_to.frame(iFrame)
 
   while 1:
     try:
       # html 로딩 대기
-      goods = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="connectpay-portal-container"]/div/div/a[2]')))
+      goods = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="brandpay-portal-container"]/div/div/a[2]')))
       if(goods):
         break
     except:
@@ -306,7 +317,7 @@ def start():
 
   def click_number_keypad(driver, number):
       script = f"""
-          var keypadElement = document.querySelector("#connectpay-portal-container > div > div");
+          var keypadElement = document.querySelector("#brandpay-portal-container > div > div");
           var numberButtons = keypadElement.querySelectorAll("a[data-virtual-keypad='{number}']");
           if (numberButtons.length > 0) {{
               var randomNumberButton = numberButtons[Math.floor(Math.random() * numberButtons.length)];
@@ -320,7 +331,7 @@ def start():
       driver.execute_script(script)
 
   script = f"""
-          var keypadElement = document.querySelector("#connectpay-portal-container > div > div");
+          var keypadElement = document.querySelector("#brandpay-portal-container > div > div");
           return keypadElement.querySelectorAll("a");
       """
   a_elements = driver.execute_script(script)
