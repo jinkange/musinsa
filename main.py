@@ -159,13 +159,14 @@ def start():
         #element = driver.find_element(By.XPATH, '//*[@id="buy_option_area"]/div[9]/div[1]/a')
         # '품절' 또는 '판매가 중지' 문구가 포함되어 있는지 확인
         
-        parts = goodUrl.split('/')
-        last_word = parts[-1]
-        element = driver.find_element(By.XPATH, '//*[@id="count_product_info_'+last_word+'"]')
-        element_text = element.text
-        time.sleep(1)
-        if(element_text == "00:00:01" or element_text == "00:00:00"):
-          driver.refresh()
+        # parts = goodUrl.split('/')
+        # last_word = parts[-1]
+        # element = driver.find_element(By.XPATH, '//*[@id="count_product_info_'+last_word+'"]')
+        # element_text = element.text
+        time.sleep(3)
+        driver.refresh()
+        # if(element_text == "00:00:01" or element_text == "00:00:00"):
+        #   driver.refresh()
       except:
         break
 
@@ -250,11 +251,11 @@ def start():
   while 1:
     try:
       # html 로딩 대기
-      goods = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
+      goods = WebDriverWait(driver, 0.1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_pay"]')))
       if(goods):
         break
     except:
-      time.sleep(1)
+      time.sleep(0.3)
   
   radio_button = driver.find_element(By.XPATH,'//*[@id="payment_btn0"]')
     # Click the radio button using JavaScript
@@ -263,7 +264,7 @@ def start():
   
   option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cardSwiper"]/div[2]')))
   option_element.click()
-  time.sleep(0.5)
+  time.sleep(0.3)
   try:
     option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="allCheckAgree"]')))
     option_element.click()
@@ -300,14 +301,14 @@ def start():
           if window_handle != current_window:
               new_window = window_handle
               driver.switch_to.window(window_handle)
-              time.sleep(0.5)
+              time.sleep(0.3)
               current_url = driver.current_url
               print("새창 찾기 창 주소: " + driver.current_url)
               if "https://pay.musinsa.com/certify/req"  in current_url:
                   print("찾는 주소가 열린 창입니다.")
                   break
               driver.switch_to.window(new_window)
-          time.sleep(0.5)
+          time.sleep(0.3)
 
   iFrame = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH,'//*[@id="__tosspayments_brandpay_iframe__"]')))
   driver.switch_to.frame(iFrame)
@@ -315,7 +316,7 @@ def start():
   while 1:
     try:
       # html 로딩 대기
-      goods = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="brandpay-portal-container"]/div/div/a[2]')))
+      goods = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="brandpay-portal-container"]/div/div/a[2]')))
       if(goods):
         break
     except:
