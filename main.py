@@ -83,7 +83,7 @@ def htmlLoadingCheck(driver:webdriver, xpath):
             driver.execute_script("document.evaluate('"+xpath+"', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();")
             return
         except:
-            time.sleep(1)
+            time.sleep(0.1)
             try:
                 driver.execute_script("document.evaluate('//*[@id=\"lastName\"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();")    
                 return 1
@@ -138,7 +138,7 @@ def start():
               break
       except Exception:
           print()
-      time.sleep(1)
+      time.sleep(0.1)
   print("로그인 확인..")
   print("품절 체크")  
   while 1:
@@ -264,7 +264,6 @@ def start():
   
   option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cardSwiper"]/div[2]')))
   option_element.click()
-  time.sleep(0.3)
   try:
     option_element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="allCheckAgree"]')))
     option_element.click()
@@ -310,7 +309,7 @@ def start():
               driver.switch_to.window(new_window)
           time.sleep(0.3)
 
-  iFrame = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH,'//*[@id="__tosspayments_brandpay_iframe__"]')))
+  iFrame = WebDriverWait(driver, 99).until(EC.presence_of_element_located((By.XPATH,'//*[@id="__tosspayments_brandpay_iframe__"]')))
   driver.switch_to.frame(iFrame)
 
   while 1:
@@ -322,10 +321,12 @@ def start():
     except:
       time.sleep(0.1)
 
+
+  
   def click_number_keypad(driver, number):
       script = f"""
           var keypadElement = document.querySelector("#brandpay-portal-container > div > div");
-          var numberButtons = keypadElement.querySelectorAll("a[data-virtual-keypad='{number}']");
+          var numberButtons = keypadElement.querySelectorAll("a[aria-label='가상키패드-{number}']");
           if (numberButtons.length > 0) {{
               var randomNumberButton = numberButtons[Math.floor(Math.random() * numberButtons.length)];
               randomNumberButton.dispatchEvent(new MouseEvent('mouseup', {{
@@ -336,8 +337,9 @@ def start():
           }}
       """
       driver.execute_script(script)
+      
 
-  script = f"""
+  script = """
           var keypadElement = document.querySelector("#brandpay-portal-container > div > div");
           return keypadElement.querySelectorAll("a");
       """
@@ -349,8 +351,9 @@ def start():
     try:
       for password in password_str:  
         for a_element in a_elements:
-          virtual_keypad_value = a_element.get_attribute("data-virtual-keypad")
+          virtual_keypad_value = a_element.get_attribute("aria-label").replace("가상키패드-","")
           if(password == a_element.text):
+            print(password)
             click_number_keypad(driver, virtual_keypad_value)
             break
       #창이 닫혔는지
