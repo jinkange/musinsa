@@ -66,10 +66,10 @@ def chromeStart():
         #options.add_experimental_option("debuggerAddress", "127.0.0.1:922"+str(number[0]))
         #p = subprocess.Popen(chrome_cmd, shell=True)
 
-        release = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+        #release = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
         # 버전명을 가져옵니다.
-        version = requests.get(release).text
-        driver = webdriver.Chrome(options=options)
+        #version = requests.get(release).text
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         
         
         return driver
