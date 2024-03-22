@@ -22,6 +22,7 @@ import time
 from datetime import datetime, timedelta
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
+import re
 
 def is_within_last_week(date_string):
     # Convert the input date string to a datetime object
@@ -130,14 +131,18 @@ def start():
   while 1:
     if(driver.current_url in goodUrl):
       try : 
-          #element = driver.find_element(By.XPATH, '//*[@id="topCommonPc"]/header/div[4]/div[1]/a')
-          #element = driver.find_element(By.XPATH, '//*[@id="topCommonPc"]/header/div[3]/div[1]/a')
-          element = driver.find_element(By.XPATH, '//*[@id="topCommonPc"]/header/div[2]/div[1]')
-          if (element):
-              #로그인되어있음
-              break
+        index_value = driver.execute_script('return sessionStorage.getItem("tt_pixel_session_index");')
+        if index_value is not None:
+          print(index_value)
+          # 가져온 값이 "index:0" 또는 "index:1" 형태인지 확인합니다.
+          if index_value == '{"index":1}':
+            break
+          elif index_value == '{"index":0}':
+            time.sleep(1)
+        else:
+          time.sleep(1)
       except Exception:
-          print()
+          print("로그인 미확인")
       time.sleep(0.1)
   print("로그인 확인..")
   print("품절 체크")  
@@ -178,9 +183,7 @@ def start():
         
         option_element.click()
       except:
-        #option_dropdown = driver.find_element(By.XPATH, "//select[@id='option1']")
-        option_dropdown = driver.find_element(By.XPATH, '//*[@id="root"]/div[1]/div[2]/div[2]/div[11]/div[1]/select')
-        
+        option_dropdown = driver.find_element(By.XPATH, "//option[@value='240']/ancestor::select[1]")
         # '옵션 선택'을 제외한 옵션들을 찾아서 리스트에 저장
         available_options = option_dropdown.find_elements(By.XPATH, "./option[not(contains(text(), '옵션 선택'))]")
         # 재입고와 관련된 옵션을 제거
@@ -191,7 +194,7 @@ def start():
     else:
       # 옵션 선택 드롭다운을 찾음
       #option_dropdown = driver.find_element(By.XPATH, "//select[@id='option1']")
-      option_dropdown = driver.find_element(By.XPATH, '//*[@id="root"]/div[1]/div[2]/div[2]/div[11]/div[1]/select')
+      option_dropdown = driver.find_element(By.XPATH, "//option[@value='240']/ancestor::select[1]")
       # '옵션 선택'을 제외한 옵션들을 찾아서 리스트에 저장
       available_options = option_dropdown.find_elements(By.XPATH, "./option[not(contains(text(), '옵션 선택'))]")
       # 재입고와 관련된 옵션을 제거
@@ -199,29 +202,11 @@ def start():
       # 랜덤으로 옵션 선택
       selected_option = random.choice(available_options)
       selected_option.click()
-
-
-      # # 옵션 리스트 가져오기
-      # options_list = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//select[@id='option1']")))
-      # print(options_list)
-      # # "재입고 알림 받기"가 없는 옵션들만 필터링
-      # available_options = [option for option in options_list if "재입고 알림 받기" not in option.get_attribute("data-txt")]
-      # if available_options:
-      #   # 랜덤으로 하나의 옵션 선택
-      #   selected_option = random.choice(available_options)
-      #   option_value = selected_option.get_attribute("value")
-      #   selected_option.click()
-      # else:
-      #   print("모든 옵션이 품절 상태입니다.")
   except Exception as e:
     print("옵션창을 찾을 수 없습니다.")
 
   try:
-      #buy_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), '바로구매')]")))
-      buy_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div[1]/div[2]/div[2]/div[13]/ul/button')))
-      #buy_button.click()
-          # Click the element using JavaScript
-          
+      buy_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//strong[contains(text(), '바로구매')]/ancestor::button[1]")))
       driver.execute_script("arguments[0].click();", buy_button)
       try:
         # 얼럿이 표시될 때까지 대기 (10초로 설정)
@@ -233,8 +218,8 @@ def start():
         # 얼럿 확인 버튼 클릭 (선택사항)
         alert.accept()
         # 옵션 선택 드롭다운을 찾음
-        #option_dropdown = driver.find_element(By.XPATH, "//select[@id='option1']")
-        option_dropdown = driver.find_element(By.XPATH, '//*[@id="root"]/div[1]/div[2]/div[2]/div[11]/div[1]/select')
+        option_dropdown = driver.find_element(By.XPATH, "//option[@value='240']/ancestor::select[1]")
+        
         # '옵션 선택'을 제외한 옵션들을 찾아서 리스트에 저장
         available_options = option_dropdown.find_elements(By.XPATH, "./option[not(contains(text(), '옵션 선택'))]")
         # 재입고와 관련된 옵션을 제거
@@ -251,9 +236,10 @@ def start():
           print()
   except Exception as e:
       print("바로구매 버튼을 클릭하는데 실패했습니다.")
-      buy_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="buy_option_area"]/div[7]/div[1]/a')))
+      buy_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//strong[contains(text(), '바로구매')]/ancestor::button[1]")))
       buy_button.click()
       print(str(e))
+#옵션창
 
 
   while 1:
