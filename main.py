@@ -161,14 +161,11 @@ def start():
       try:
         # 해당 요소의 텍스트 가져오기
         element = driver.find_element(By.XPATH, "//*[contains(text(), '판매 예정')]")
-        #element = driver.find_element(By.XPATH, '//*[@id="buy_option_area"]/div[9]/div[1]/a')
-        # '품절' 또는 '판매가 중지' 문구가 포함되어 있는지 확인
-        
         # parts = goodUrl.split('/')
         # last_word = parts[-1]
         # element = driver.find_element(By.XPATH, '//*[@id="count_product_info_'+last_word+'"]')
         # element_text = element.text
-        time.sleep(3)
+        time.sleep(2)
         driver.refresh()
         # if(element_text == "00:00:01" or element_text == "00:00:00"):
         #   driver.refresh()
