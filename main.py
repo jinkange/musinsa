@@ -60,6 +60,10 @@ def chromeStart():
       print("./data/chrome.txt 에 크롬의 위치를 입력 해주세요.")
     if(number == ''):
       print("./data/number.txt 에 숫자를 입력 해주세요.")
+    options = Options()
+    # options.add_argument('--headless')
+    # driver = webdriver.Chrome(options=options)
+    
     driver = webdriver.Chrome()
     return driver
   except Exception as e:
@@ -87,13 +91,24 @@ def wait_and_click_quick_pay_button(driver:webdriver, xpath):
       )
       # 버튼 클릭
       quick_pay_button.click()
-      print("버튼을 클릭했습니다.")
+      print(xpath + "버튼을 클릭했습니다.")
       break  # 클릭 후 루프 종료
     except Exception as e:
-      print("버튼이 아직 나타나지 않았습니다. 다시 시도합니다...")
+      print(xpath + "버튼이 아직 나타나지 않았습니다. 다시 시도합니다...")
       # 예외 발생 시 잠시 대기 후 재시도
       time.sleep(1)  
-      
+def click(driver:webdriver, xpath):
+  try:
+    # 버튼이 나타날 때까지 기다림
+    quick_pay_button = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, xpath))
+    )
+    # 버튼 클릭
+    quick_pay_button.click()
+    print(xpath + "버튼을 클릭했습니다.")
+  except Exception as e:
+    print(xpath + "버튼이 아직 나타나지 않았습니다. 다시 시도합니다...")
+
 def start():
   with open("./data/password.txt", "r", encoding='utf-8') as password_file:
     password_str = password_file.readline().strip()
@@ -123,6 +138,7 @@ def start():
     else:
       break
   driver.get(goodUrl)
+  driver.execute_script("window.scrollBy(0, 1000);")  # 500px 만큼 내리기
   print("품절 체크")  
   while 1:
     if(driver.current_url in goodUrl):
@@ -148,23 +164,35 @@ def start():
     # 구매하기
     # 옵션 선택 단어 클릭  //*[@id="root"]/div[1]/div[19]/div[2]/div[1]/div/div
     wait_and_click_quick_pay_button(driver, '//button[span[text()="구매하기"]]')
-    wait_and_click_quick_pay_button(driver, '//input[@placeholder="옵션 선택"]')
-    option_select_div = driver.find_element(By.XPATH, '//input[@placeholder="옵션 선택"]')
-    # 약간의 대기 (로딩 시간 고려)
-    time.sleep(1)
-    # '옵션 선택'의 두 번째 상위 div에서 첫 번째 요소 제외한 나머지 요소 선택
-    parent_div = option_select_div.find_element(By.XPATH, '../..')  # 두 번째 상위 div로 이동
-    dropdown_items = parent_div.find_elements(By.XPATH, './div[position()>1]')  # 첫 번째 요소 제외
-    # 나머지 요소 중 랜덤 선택
-    random_choice = random.choice(dropdown_items)
-    random_choice.click()
-    wait_and_click_quick_pay_button(driver, '//button[span[text()=" 빠른결제"]]')
+    try:
+      option_select_div = driver.find_element(By.XPATH, '//input[@placeholder="옵션 선택"]')
+      input_count = len(option_inputs)
+      if(input_count != 0):
+        for index, input_field in enumerate(option_inputs):
+          wait_and_click_quick_pay_button(driver, '//input[@placeholder="옵션 선택"]')
+          # 약간의 대기 (로딩 시간 고려)
+          time.sleep(1)
+          # '옵션 선택'의 두 번째 상위 div에서 첫 번째 요소 제외한 나머지 요소 선택
+          parent_div = option_select_div.find_element(By.XPATH, '../..')  # 두 번째 상위 div로 이동
+          dropdown_items = parent_div.find_elements(By.XPATH, './div[position()>1]')  # 첫 번째 요소 제외
+          # 나머지 요소 중 랜덤 선택
+          random_choice = random.choice(dropdown_items)
+          random_choice.click()
+    except:
+      print("옵션없음")
+    wait_and_click_quick_pay_button(driver, '')
+    #https://www.musinsa.com/products/672867 프리 테스트
+    #https://www.musinsa.com/products/4311482 옵션 n개
+
+    
 
     # CSS 선택자를 사용하여 "원 결제하기" 버튼 클릭
     payment_button = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-button-name="결제하기"]'))
     )
     payment_button.click()  # 버튼 클릭
+    
+    click(driver, '//*[contains(text(), "바로 구매하기")]')
     #새창 대기
     current_window = driver.current_window_handle
     # 새로운 창 핸들 찾기
