@@ -54,13 +54,12 @@ def is_within_last_week(date_string):
 
 def chromeStart():
   try:
-    # options = Options()
-    # options.add_argument('--headless')
-    # options.add_argument("--no-sandbox")
-    # options.add_argument("--disable-dev-shm-usage")
-    # driver = webdriver.Chrome(options=options)
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument('--disable-gpu')
+    driver = webdriver.Chrome(options=options)
     
-    driver = webdriver.Chrome()
+    # driver = webdriver.Chrome()
     return driver
   except Exception as e:
     print(e)
@@ -215,6 +214,8 @@ def one_payment(driver: webdriver) -> bool:
 def init():
   global goodUrl
   global password_str
+  global id
+  global pw
   with open("./data/password.txt", "r", encoding='utf-8') as password_file:
     password_str = password_file.readline().strip()
   print("페이 비밀번호 :  ",password_str)
@@ -223,23 +224,32 @@ def init():
     if goodUrl:
       print("주소 : ",goodUrl)
       break
-  # id = input("무신사 아이디 : ")
-  # pw = input("무신사 비밀번호 : ")
+  id = input("무신사 아이디 : ")
+  pw = input("무신사 비밀번호 : ")
+def human_like_typing(element, text, delay=0.1):
+    for char in text:
+        element.send_keys(char)
+        time.sleep(random.uniform(delay, delay + 0.2))  # 0.1~0.3초 랜덤 지연
+        
 def login(driver:webdriver):
   global goodUrl
   global id
   global pw
   driver.get("https://www.musinsa.com/auth/login")
-  # input_field = driver.find_element(By.CSS_SELECTOR, 'input[title="아이디 입력"]')
-  # input_field.send_keys(id)
-  # input_field = driver.find_element(By.CSS_SELECTOR, 'input[title="비밀번호 입력"]')
-  # input_field.send_keys(pw)
-  # driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[3]/button').click()
+  input_field = driver.find_element(By.CSS_SELECTOR, 'input[title="아이디 입력"]')
+  human_like_typing(input_field, id)
+    
+  input_field = driver.find_element(By.CSS_SELECTOR, 'input[title="비밀번호 입력"]')
+  human_like_typing(input_field, pw)
+    
+  driver.find_element(By.XPATH, '//*[@id="loginForm"]/div/div[3]/button').click()
   while 1:
     if(driver.current_url in "https://www.musinsa.com/auth/login"):
       time.sleep(1)
     else:
       break
+  
+  print("로그인 성공")
   driver.get(goodUrl)
   driver.execute_script("document.body.style.zoom='10%'")
 def click_buy(driver:webdriver):
@@ -290,7 +300,7 @@ def start():
     
     
     
-
-start()
+if(is_within_last_week("2024-10-14")):
+  start()
 
 
